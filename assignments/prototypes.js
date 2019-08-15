@@ -81,49 +81,50 @@ function Hero(attr)
   this.specialCounter = 0;
 }
 Hero.prototype = Object.create(Humanoid.prototype);
-
 Hero.prototype.attack = function(attackee)
 {
-  if(attackee.isDead()) { return; }
-  let damage = 0;
-  //Check to see if attackeet blocks the attack
-  if(attackee.block())
+  if(!this.isDead())
   {
-    console.log(`you attack ${attackee.name} but ${attackee.name} blocks you\n`);
-    return;
+    let damage = 0;
+    //Check to see if attackeet blocks the attack
+    if(attackee.block())
+    {
+      console.log(`you attack ${attackee.name} but ${attackee.name} blocks you\n`);
+      return;
+    }
+
+    else
+    {
+      // Check for special attack
+      if(this.specialCounter >= this.specialAttackInit) 
+      { 
+        damage = this.specialAttack(); 
+        console.log('Special Attack!!');
+        }
+
+      // the max damage he does is his max attackPower randomized to be 0.1 to max
+      else { damage = this.regularAttack(); } 
+    }    
+    attackee.isHit(damage)
+
+      if(attackee.isDead()) { console.log(`you killed ${attackee.name}!\n`); }
+
+      else { console.log(`you hit ${attackee.name} for ${damage} he has ${attackee.healthPoints} hp left!\n`); }    
   }
-
-  else
-  {
-    // Check for special attack
-    if(this.specialCounter >= this.specialAttackInit) 
-    { 
-      damage = this.specialAttack(); 
-      console.log('Special Attack!!');
-      }
-
-    // the max damage he does is his max attackPower randomized to be 0.1 to max
-    else { damage = this.regularAttack(); } 
-  }    
-  attackee.isHit(damage)
-
-    if(attackee.isDead()) { console.log(`you killed ${attackee.name}!\n`); }
-
-    else { console.log(`you hit ${attackee.name} for ${damage} he has ${attackee.healthPoints} hp left!\n`); }    
-  };
+  }
 
   Hero.prototype.block = function()
   {
       if(((Math.random() * 100) + 1) <= this.blockPercentage) { return true; }
       return false;
-  };
+  }
 
 Hero.prototype.regularAttack = function()
 {
   this.specialCounter++;
   damage = Math.random() * (this.attackPower * 100) + 1;
   return Math.round(damage);
-};
+}
 
 Hero.prototype.specialAttack = function()
 {
@@ -134,18 +135,18 @@ Hero.prototype.specialAttack = function()
   // Add his special multiplier
   damage += (Math.random() * 100 + 1) * this.specialMultiplier;
    return Math.round(damage);
-};
+}
 
 Hero.prototype.isHit = function(damage)
 {
   this.healthPoints -= damage;
-};
+}
 
 Hero.prototype.isDead = function()
 {
   if(this.healthPoints <= 0) { return true; }
   return false;
-};
+}
 
 function Villian(attr)
 {
@@ -161,7 +162,8 @@ function Villian(attr)
 Villian.prototype = Object.create(Humanoid.prototype);
 Villian.prototype.attack = function(attackee)
 {
-  if(attackee.isDead()) { return; }
+  if(!this.isDead())
+  {
     let damage = 0;
   //Check to see if attackee blocks the attack
   if(attackee.block())
@@ -186,21 +188,22 @@ Villian.prototype.attack = function(attackee)
 
     if(attackee.isDead()) { console.log(`you killed ${attackee.name}!\n`); }
 
-    else { console.log(`you hit ${attackee.name} for ${damage} he has ${attackee.healthPoints} hp left!\n`); }    
-};
+    else { console.log(`you hit ${attackee.name} for ${damage} he has ${attackee.healthPoints} hp left!\n`); }   
+  } 
+}
 
 Villian.prototype.block = function()
 {
     if(((Math.random() * 100) + 1) <= this.blockPercentage) { return true; }
     return false;
-};
+}
 
 Villian.prototype.regularAttack = function()
 {
   this.specialCounter++;
   damage = Math.random() * (this.attackPower * 100) + 1;
    return Math.round(damage);
-};
+}
 
 Villian.prototype.specialAttack = function()
 {
@@ -211,18 +214,18 @@ Villian.prototype.specialAttack = function()
   // Add his special multiplier
   damage += (Math.random() * 100 + 1) * this.specialMultiplier;
    return Math.round(damage);
-};
+}
 
 Villian.prototype.isHit = function(damage)
 {
   this.healthPoints -= damage;
-};
+}
 
 Villian.prototype.isDead = function()
 {
   if(this.healthPoints <= 0) { return true; }
   return false;
-};
+}
  
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
@@ -303,7 +306,7 @@ const bountyHunter = new Hero(
     {
       createdAt: new Date(),
       dimensions: { length: 1, width: 2, height: 4},
-      healthPoints: 1800,
+      healthPoints: 1400,
       name: 'Desmond',
       team: 'Assassins Guild',
       weapons: [ 'Ninja Sword'],
@@ -351,9 +354,9 @@ const bountyHunter = new Hero(
   console.log('\n');
 
   let counter = 0;
-  while(!bountyHunter.isDead() || !assassin.isDead())
+  while(!bountyHunter.isDead() && !assassin.isDead())
   {
-    if(counter % 2 && !bountyHunter.isDead()) { bountyHunter.attack(assassin);}
+    if(counter % 2) { bountyHunter.attack(assassin);}
     else { assassin.attack(bountyHunter);}
     counter++;
   }
